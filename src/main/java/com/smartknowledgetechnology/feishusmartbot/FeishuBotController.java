@@ -282,14 +282,14 @@ public class FeishuBotController {
     private void sendMcpTrialGroupWelcome(String chatId, String userId, String token) {
         String url = "https://open.feishu.cn/open-apis/im/v1/messages?receive_id_type=chat_id";
         String welcomeContent =
-            "<at user_id=\"" + userId + "\"></at> 👏 欢迎加入 MCP 试标群！\n" +
-            "📌 快速上手指南：\n" +
-            "• 先看群公告 → 了解群规与注意事项\n" +
-            "• 再读《MCP 培训文档》→ 掌握考核与操作流程\n" +
-            "🔥 项目火热进行中！持续到清明节后，需求超 500+ 道题\n" +
-            "💰 每完成一道题，即可获得 300-500 元收益，多劳多得！\n" +
+            "<at user_id=\"" + userId + "\"></at>  欢迎加入 MCP 试标群！\n" +
+            "快速上手指南：\n" +
+            "先看群公告 → 了解群规与注意事项\n" +
+            "再读《MCP 培训文档》→ 掌握考核与操作流程\n" +
+            "项目火热进行中！持续到清明节后，需求超 500+ 道题\n" +
+            "每完成一道题，即可获得 300-500 元收益，多劳多得！\n" +
             "还有额外内推奖励哦！\n" +
-            "❓ 有任何问题，随时 @群管理员 为你解答\n";
+            "有任何问题，随时 @群管理员 为你解答\n";
 
         JSONObject content = new JSONObject();
         content.put("text", welcomeContent);
