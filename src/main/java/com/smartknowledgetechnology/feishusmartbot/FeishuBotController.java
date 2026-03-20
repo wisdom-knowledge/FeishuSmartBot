@@ -32,11 +32,17 @@ public class FeishuBotController {
     @Value("${feishu.bitable.table-id.newbie}")
     private String bitableTableIdNewbie;
 
+    @Value("${feishu.bitable.table-id.mcp.trial}")
+    private String bitableTableIdMcpTrial;
+
     @Value("${feishu.chat.target-id.trial}")
     private String targetChatIdTrial;
 
     @Value("${feishu.chat.target-id.newbie}")
     private String targetChatIdNewbie;
+
+    @Value("${feishu.chat.target-id.mcp.trial}")
+    private String targetChatIdMcpTrial;
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final ExecutorService executorService = Executors.newFixedThreadPool(15);
@@ -88,6 +94,9 @@ public class FeishuBotController {
             } else if (targetChatIdNewbie.equals(chatId)) {
                 writeToBitable(userName, userId, token, bitableTableIdNewbie);
                 sendNewbieNotice(chatId, userId, userName, token);
+            } else if (targetChatIdMcpTrial.equals(chatId)) {
+                writeToBitable(userName, userId, token, bitableTableIdMcpTrial);
+                sendMcpTrialGroupWelcome(chatId, userId, token);
             }
         } catch (Exception e) {
             System.err.println("处理业务失败: " + e.getMessage());
@@ -217,7 +226,8 @@ public class FeishuBotController {
                         "4.提交试标任务\n" +
                         "5.获取收入\n" +
                         "⚠️ 注意事项：\n" +
-                        "试标可以提交三道，通过可以拿钱，初审通过转正式，一天可以提交五道。";
+                        "试标可以提交三道，通过可以拿钱，初审通过转正式，一天可以提交五道。" +
+                        "我们目前项目正在火热进行中，下周末截止，需求1000+，每条的预期收益在500-800元，难度不大。快快参与吧！";
 
         JSONObject content = new JSONObject();
         content.put("text", welcomeContent);
@@ -250,7 +260,12 @@ public class FeishuBotController {
             postRequest(privateUrl, body.toJSONString(), token);
         } catch (Exception e) {
             String groupUrl = "https://open.feishu.cn/open-apis/im/v1/messages?receive_id_type=chat_id";
-            String groupTxt = "<at user_id=\"" + userId + "\"></at> 欢迎加入！由于隐私限制，请点击机器人头像发“你好”，我将为您发送新人指南。";
+            String groupTxt = "<at user_id=\"" + userId + "\"></at> 你好，欢迎加入 Hippo 新人考试群。\n" +
+                    "📋 新人指引：\n" +
+                    "请优先查阅群公告，知悉群内相关要求\n" +
+                    "详细阅读《Hippo 项目新人指南》，了解项目与考核流程\n" +
+                    "我们目前项目正在火热进行中，下周末截止，需求1000+，每条的预期收益在500-800元，难度不大。快通过考试参与吧\n" +
+                    "若有问题，可 @群管理员获取协助\n";
 
             JSONObject gContent = new JSONObject();
             gContent.put("text", groupTxt);
@@ -262,6 +277,29 @@ public class FeishuBotController {
 
             postRequest(groupUrl, gBody.toJSONString(), token);
         }
+    }
+
+    private void sendMcpTrialGroupWelcome(String chatId, String userId, String token) {
+        String url = "https://open.feishu.cn/open-apis/im/v1/messages?receive_id_type=chat_id";
+        String welcomeContent =
+            "<at user_id=\"" + userId + "\"></at> 👏 欢迎加入 MCP 试标群！\n" +
+            "📌 快速上手指南：\n" +
+            "• 先看群公告 → 了解群规与注意事项\n" +
+            "• 再读《MCP 培训文档》→ 掌握考核与操作流程\n" +
+            "🔥 项目火热进行中！持续到清明节后，需求超 500+ 道题\n" +
+            "💰 每完成一道题，即可获得 300-500 元收益，多劳多得！\n" +
+            "还有额外内推奖励哦！\n" +
+            "❓ 有任何问题，随时 @群管理员 为你解答\n";
+
+        JSONObject content = new JSONObject();
+        content.put("text", welcomeContent);
+
+        JSONObject body = new JSONObject();
+        body.put("receive_id", chatId);
+        body.put("msg_type", "text");
+        body.put("content", content.toJSONString());
+
+        postRequest(url, body.toJSONString(), token);
     }
 
     private void postRequest(String url, String jsonBody, String token) {
