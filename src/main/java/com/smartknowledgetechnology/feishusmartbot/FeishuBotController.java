@@ -221,15 +221,7 @@ public class FeishuBotController {
                 "<at user_id=\"" + userId + "\"></at> 欢迎通过面试，进入试标阶段，请务必阅读以下内容：\n" +
                         "1.进入试标群并查看群公告\n" +
                         "2.仔细阅读《Hippo项目指南》：\n" +
-                        "https://meetchances.feishu.cn/docx/QJdZd5MjxoD2YJxOiZcc6tAFnBe\n" +
-                        "3.开始第一条试标任务创建和开发\n" +
-                        "4.提交试标任务\n" +
-                        "5.获取收入\n" +
-                        "⚠️ 注意事项：\n" +
-                        "试标可以提交三道，通过可以拿钱，初审通过转正式，一天可以提交五道。\n" +
-                        "我们目前项目正在火热进行中，下周末截止，需求1000+，每条的预期收益在500-800元，\n" +
-                        "您要邀请的专家，只要在Tb2.0七期项目结束前至少提交1条任务（最终通过），您即可获得💰¥500元内推奖励 \n" +
-                        "难度不大。快快参与吧！";
+                        "https://meetchances.feishu.cn/docx/QJdZd5MjxoD2YJxOiZcc6tAFnBe";
 
         JSONObject content = new JSONObject();
         content.put("text", welcomeContent);
@@ -266,8 +258,6 @@ public class FeishuBotController {
                     "📋 新人指引：\n" +
                     "请优先查阅群公告，知悉群内相关要求\n" +
                     "详细阅读《Hippo 项目新人指南》，了解项目与考核流程\n" +
-                    "我们目前项目正在火热进行中，下周末截止，需求1000+，每条的预期收益在500-800元，难度不大。快通过考试参与吧\n" +
-                    "您要邀请的专家，只要在Tb2.0七期项目结束前至少提交1条任务（最终通过），您即可获得💰¥500元内推奖励 \n" +
                     "若有问题，可 @群管理员获取协助\n";
 
             JSONObject gContent = new JSONObject();
