@@ -258,7 +258,7 @@ public class FeishuBotController {
                     "📋 新人指引：\n" +
                     "请优先查阅群公告，知悉群内相关要求\n" +
                     "详细阅读《Hippo 项目新人指南》，了解项目与考核流程\n" +
-                    "若有问题，可 @群管理员获取协助\n";
+                    "若有问题，可@徐璐菲/@王民从获取协助\n";
 
             JSONObject gContent = new JSONObject();
             gContent.put("text", groupTxt);
@@ -277,8 +277,8 @@ public class FeishuBotController {
         String welcomeContent =
             "<at user_id=\"" + userId + "\"></at>  欢迎加入 MCP 试标群！\n" +
             "快速上手指南：\n" +
-            "先看群公告 → 了解群规与注意事项\n" +
-            "再读《MCP 培训文档》→ 掌握考核与操作流程\n" +
+            "先看群公告（群聊右上角点击进入/手机端右上角群应用点击“公告”） → 了解群规与注意事项\n" +
+            "再读《MCP 培训文档》（https://meetchances.feishu.cn/wiki/XgJHwAGqkiAk6MkH0eXcpMX0nXg?from=from_copylink） → 掌握考核与操作流程\n" +
             "项目火热进行中！持续到清明节后，需求超 500+ 道题\n" +
             "每完成一道题，即可获得 300-500 元收益，多劳多得！\n" +
             "还有额外内推奖励哦！\n" +
