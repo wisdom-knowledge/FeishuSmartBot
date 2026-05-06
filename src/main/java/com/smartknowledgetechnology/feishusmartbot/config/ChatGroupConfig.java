@@ -70,6 +70,10 @@ public class ChatGroupConfig {
         return bitableAppToken;
     }
 
+    public String getBitableTableIdClaudeCodeFormal() {
+        return bitableTableIdClaudeCodeFormal;
+    }
+
     /**
      * 根据 chatId 查找对应的多维表格 tableId，未匹配返回 null
      */

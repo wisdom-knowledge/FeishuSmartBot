@@ -6,6 +6,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class WelcomeService {
 
+    private static final String PRIVATE_STATUS_CHAT_CREATED = "已打开会话";
+    private static final String PRIVATE_STATUS_MESSAGE_RECEIVED = "已发送私信";
+
     private final FeishuApiClient apiClient;
     private final FeishuChatService chatService;
     private final FeishuBitableService bitableService;
@@ -62,10 +65,20 @@ public class WelcomeService {
     public void handlePrivateMessage(String userId, String chatId) {
         try {
             String token = apiClient.getTenantAccessToken();
+            bitableService.trackClaudeCodePrivateChat(userId, chatId, PRIVATE_STATUS_MESSAGE_RECEIVED, token);
             String userName = chatService.getUserName(chatId, userId, token);
             messageService.sendPrivateGuide(userId, userName, token);
         } catch (Exception e) {
             System.err.println("处理私聊消息失败: " + e.getMessage());
+        }
+    }
+
+    public void handleBotP2pChatCreated(String userId, String chatId) {
+        try {
+            String token = apiClient.getTenantAccessToken();
+            bitableService.trackClaudeCodePrivateChat(userId, chatId, PRIVATE_STATUS_CHAT_CREATED, token);
+        } catch (Exception e) {
+            System.err.println("处理机器人私聊会话创建事件失败: " + e.getMessage());
         }
     }
 }

@@ -32,6 +32,18 @@ public class FeishuEventController {
             return resp;
         }
 
+        JSONObject legacyEvent = eventJson.getJSONObject("event");
+        if (legacyEvent != null && "p2p_chat_create".equals(legacyEvent.getString("type"))) {
+            String chatId = legacyEvent.getString("chat_id");
+            JSONObject user = legacyEvent.getJSONObject("user");
+            String userId = user == null ? null : user.getString("open_id");
+            if (userId != null && chatId != null) {
+                System.out.println(">>> 监听到用户和机器人首次创建私聊会话: Chat=" + chatId + ", User=" + userId);
+                executorService.submit(() -> welcomeService.handleBotP2pChatCreated(userId, chatId));
+            }
+            return Map.of("msg", "ok");
+        }
+
         JSONObject header = eventJson.getJSONObject("header");
         if (header == null) return Map.of("msg", "ok");
 

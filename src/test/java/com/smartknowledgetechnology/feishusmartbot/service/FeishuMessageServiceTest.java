@@ -43,8 +43,19 @@ class FeishuMessageServiceTest {
         assertTrue(markdown.getJSONObject("text").getString("content").contains("<at id=ou_test_user></at>"));
         assertTrue(markdown.getJSONObject("text").getString("content").contains("恭喜您进入正式任务阶段"));
 
-        JSONObject action = elements.getJSONObject(elements.size() - 1);
-        JSONObject button = action.getJSONArray("actions").getJSONObject(0);
+        JSONObject button = null;
+        for (int i = 0; i < elements.size(); i++) {
+            JSONObject element = elements.getJSONObject(i);
+            if (!"action".equals(element.getString("tag"))) continue;
+            JSONArray actions = element.getJSONArray("actions");
+            if (actions == null || actions.isEmpty()) continue;
+            JSONObject candidate = actions.getJSONObject(0);
+            if ("打开任务助手".equals(candidate.getJSONObject("text").getString("content"))) {
+                button = candidate;
+                break;
+            }
+        }
+        assertTrue(button != null, "should contain 打开任务助手 button");
         assertEquals("button", button.getString("tag"));
         assertEquals("primary", button.getString("type"));
         assertEquals("打开任务助手", button.getJSONObject("text").getString("content"));

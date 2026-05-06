@@ -36,6 +36,17 @@ public class FeishuApiClient {
         return restTemplate.postForObject(url, new HttpEntity<>(jsonBody, headers), String.class);
     }
 
+    public String patchRequestWithResponse(String url, String jsonBody, String token) {
+        HttpHeaders headers = buildAuthHeaders(token);
+        ResponseEntity<String> response = restTemplate.exchange(
+                url,
+                HttpMethod.PUT,
+                new HttpEntity<>(jsonBody, headers),
+                String.class
+        );
+        return response.getBody();
+    }
+
     public boolean postRequestAndCheckSuccess(String url, String jsonBody, String token, String scene) {
         try {
             String respText = postRequestWithResponse(url, jsonBody, token);

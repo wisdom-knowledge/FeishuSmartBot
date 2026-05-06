@@ -262,6 +262,18 @@ public class FeishuMessageService {
         markdown.put("text", markdownText);
         elements.add(markdown);
 
+        JSONObject ctaAction = new JSONObject();
+        ctaAction.put("tag", "action");
+        JSONArray ctaButtons = new JSONArray();
+        ctaButtons.add(buildUrlButton("打开任务助手", "primary",
+                "https://applink.feishu.cn/client/bot/open?appId=cli_a909be3353badbc6"));
+        ctaAction.put("actions", ctaButtons);
+        elements.add(ctaAction);
+
+        JSONObject hr = new JSONObject();
+        hr.put("tag", "hr");
+        elements.add(hr);
+
         JSONObject guideAction = new JSONObject();
         guideAction.put("tag", "action");
         JSONArray guideButtons = new JSONArray();
@@ -271,18 +283,6 @@ public class FeishuMessageService {
                 "https://meetchances.feishu.cn/wiki/IqYPwVYz6iBsJSkAdphcQLRanHf?from=from_copylink"));
         guideAction.put("actions", guideButtons);
         elements.add(guideAction);
-
-        JSONObject hr = new JSONObject();
-        hr.put("tag", "hr");
-        elements.add(hr);
-
-        JSONObject ctaAction = new JSONObject();
-        ctaAction.put("tag", "action");
-        JSONArray ctaButtons = new JSONArray();
-        ctaButtons.add(buildUrlButton("打开任务助手", "primary",
-                "https://applink.feishu.cn/client/bot/open?appId=cli_a909be3353badbc6"));
-        ctaAction.put("actions", ctaButtons);
-        elements.add(ctaAction);
 
         card.put("elements", elements);
 
