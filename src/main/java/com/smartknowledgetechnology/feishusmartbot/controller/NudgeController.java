@@ -94,4 +94,35 @@ public class NudgeController {
 
         return Map.of("code", 0, "msg", "测试任务已提交，正在异步发送临时卡片给群内所有成员");
     }
+
+    @PostMapping("/test_claudecode_card")
+    public Map<String, Object> testClaudeCodeCard(@RequestBody JSONObject params) {
+        String chatId = params.getString("chatId");
+        String userId = params.getString("userId");
+
+        if (chatId == null || chatId.isEmpty()) {
+            return Map.of("code", 400, "msg", "chatId 为必填参数");
+        }
+
+        executorService.submit(() -> {
+            try {
+                String token = apiClient.getTenantAccessToken();
+                String targetUserId = userId;
+                if (targetUserId == null || targetUserId.isEmpty()) {
+                    Map<String, String> members = chatService.getAllChatMembers(chatId, token);
+                    targetUserId = members.keySet().stream().findFirst().orElse("");
+                }
+                if (targetUserId == null || targetUserId.isEmpty()) {
+                    System.err.println(">>> [Claude Code 卡片测试] 群内未取到可 @ 的成员，chatId=" + chatId);
+                    return;
+                }
+                messageService.sendClaudeCodeFormalGroupWelcome(chatId, targetUserId, token);
+                System.out.println(">>> [Claude Code 卡片测试] 已请求发送，chatId=" + chatId + ", userId=" + targetUserId);
+            } catch (Exception e) {
+                System.err.println(">>> [Claude Code 卡片测试] 异常: " + e.getMessage());
+            }
+        });
+
+        return Map.of("code", 0, "msg", "Claude Code 卡片测试任务已提交，正在异步发送");
+    }
 }
