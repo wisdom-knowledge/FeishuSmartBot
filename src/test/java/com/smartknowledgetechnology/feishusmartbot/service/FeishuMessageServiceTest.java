@@ -5,6 +5,8 @@ import com.alibaba.fastjson2.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
@@ -63,5 +65,60 @@ class FeishuMessageServiceTest {
                 "https://applink.feishu.cn/client/bot/open?appId=cli_a909be3353badbc6",
                 button.getString("url")
         );
+    }
+
+    @Test
+    void sendPrivateGuideByProjectUsesProjectSpecificClaudeCodeTemplate() {
+        FeishuApiClient apiClient = mock(FeishuApiClient.class);
+        FeishuMessageService service = new FeishuMessageService(apiClient);
+
+        service.sendPrivateGuideByProject("ou_test_user", "测试用户", "tenant-token", "claudecode_formal");
+
+        ArgumentCaptor<String> bodyCaptor = ArgumentCaptor.forClass(String.class);
+        verify(apiClient).postRequest(
+                eq("https://open.feishu.cn/open-apis/im/v1/messages?receive_id_type=open_id"),
+                bodyCaptor.capture(),
+                eq("tenant-token")
+        );
+
+        JSONObject body = JSONObject.parseObject(bodyCaptor.getValue());
+        assertEquals("interactive", body.getString("msg_type"));
+        JSONObject card = JSONObject.parseObject(body.getString("content"));
+        assertEquals("项目任务引导", card.getJSONObject("header")
+                .getJSONObject("title").getString("content"));
+        JSONArray elements = card.getJSONArray("elements");
+        assertTrue(elements.getJSONObject(1).getJSONObject("text")
+                .getString("content").contains("【Claude Code 正式项目】"));
+        assertTrue(elements.getJSONObject(1).getJSONObject("text")
+                .getString("content").contains("任务提交指南"));
+    }
+
+    @Test
+    void sendPrivateGuideByProjectsCombinesMatchedProjectGuides() {
+        FeishuApiClient apiClient = mock(FeishuApiClient.class);
+        FeishuMessageService service = new FeishuMessageService(apiClient);
+
+        service.sendPrivateGuideByProjects("ou_test_user", "测试用户", "tenant-token",
+                List.of("claudecode_formal", "newbie"));
+
+        ArgumentCaptor<String> bodyCaptor = ArgumentCaptor.forClass(String.class);
+        verify(apiClient).postRequest(
+                eq("https://open.feishu.cn/open-apis/im/v1/messages?receive_id_type=open_id"),
+                bodyCaptor.capture(),
+                eq("tenant-token")
+        );
+
+        JSONObject body = JSONObject.parseObject(bodyCaptor.getValue());
+        assertEquals("interactive", body.getString("msg_type"));
+        JSONObject card = JSONObject.parseObject(body.getString("content"));
+        JSONArray elements = card.getJSONArray("elements");
+        assertTrue(elements.getJSONObject(1).getJSONObject("text")
+                .getString("content").contains("【Claude Code 正式项目】"));
+        assertTrue(elements.getJSONObject(3).getJSONObject("text")
+                .getString("content").contains("【Hippo 新人项目】"));
+        assertTrue(elements.getJSONObject(1).getJSONObject("text")
+                .getString("content").contains("Claude Code 认证专家"));
+        assertTrue(elements.getJSONObject(3).getJSONObject("text")
+                .getString("content").contains("欢迎加入项目群"));
     }
 }

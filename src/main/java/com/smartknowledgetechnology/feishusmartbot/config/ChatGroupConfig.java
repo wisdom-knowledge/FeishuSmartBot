@@ -132,4 +132,27 @@ public class ChatGroupConfig {
         map.put(targetChatIdClaudeCodeFormal, "claudecode_formal");
         return map;
     }
+
+    /**
+     * 获取项目类型到 tableId 的映射（按优先级顺序）。
+     */
+    public Map<String, String> getProjectTypeTableMappings() {
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put("claudecode_formal", bitableTableIdClaudeCodeFormal);
+        map.put("coding_agent_formal", bitableTableIdCodingAgentFormal);
+        map.put("coding_agent_trial", bitableTableIdCodingAgentTrial);
+        map.put("hippo3_formal", bitableTableIdHippo3Formal);
+        map.put("hippo3_exam", bitableTableIdHippo3Exam);
+        map.put("mcp_trial", bitableTableIdMcpTrial);
+        map.put("newbie", bitableTableIdNewbie);
+        map.put("trial", bitableTableIdTrial);
+        return map;
+    }
+
+    public String getTableIdForProjectType(String projectType) {
+        if (projectType == null || projectType.trim().isEmpty()) {
+            return null;
+        }
+        return getProjectTypeTableMappings().get(projectType);
+    }
 }

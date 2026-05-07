@@ -7,7 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -45,12 +47,48 @@ public class FeishuBitableService {
     }
 
     public void trackClaudeCodePrivateChat(String userId, String privateChatId, String status, String token) {
-        String tableId = chatGroupConfig.getBitableTableIdClaudeCodeFormal();
+        trackPrivateChatByProject(userId, privateChatId, status, token, "claudecode_formal");
+    }
+
+    public String resolveProjectTypeByOpenId(String userId, String token) {
+        List<String> projectTypes = resolveProjectTypesByOpenId(userId, token);
+        return projectTypes.isEmpty() ? null : projectTypes.get(0);
+    }
+
+    public List<String> resolveProjectTypesByOpenId(String userId, String token) {
+        List<String> hits = new ArrayList<>();
+        if (userId == null || userId.trim().isEmpty()) {
+            return hits;
+        }
+        Map<String, String> projectMappings = chatGroupConfig.getProjectTypeTableMappings();
+        for (Map.Entry<String, String> entry : projectMappings.entrySet()) {
+            String projectType = entry.getKey();
+            String tableId = entry.getValue();
+            if (tableId == null || tableId.trim().isEmpty()) {
+                continue;
+            }
+            if (hasUserInTable(tableId, userId, token)) {
+                System.out.println(">>> [PrivateGuideResolver] hit projectType=" + projectType
+                        + ", tableId=" + tableId + ", userId=" + userId);
+                hits.add(projectType);
+            }
+        }
+        if (hits.isEmpty()) {
+            System.out.println(">>> [PrivateGuideResolver] no project table hit for userId=" + userId);
+        } else {
+            System.out.println(">>> [PrivateGuideResolver] all matched projectTypes=" + hits + ", userId=" + userId);
+        }
+        return hits;
+    }
+
+    public void trackPrivateChatByProject(String userId, String privateChatId, String status, String token, String projectType) {
+        String tableId = chatGroupConfig.getTableIdForProjectType(projectType);
         if (tableId == null || tableId.trim().isEmpty()) {
-            System.err.println(">>> Claude Code formal table id is empty; skip private chat status tracking");
+            System.err.println(">>> private chat tracking skipped: table id is empty, projectType=" + projectType);
             return;
         }
-        System.out.println(">>> [ClaudePrivateTrack] tableId=" + tableId + ", userId=" + userId + ", status=" + status);
+        System.out.println(">>> [PrivateTrack] projectType=" + projectType + ", tableId=" + tableId
+                + ", userId=" + userId + ", status=" + status);
 
         JSONObject fields = new JSONObject();
         fields.put(FIELD_OPEN_ID, userId);
@@ -67,14 +105,23 @@ public class FeishuBitableService {
             recordId = findRecordIdByAnyField(tableId, userId, token);
         }
         if (recordId == null) {
-            System.out.println(">>> Claude Code private chat user is not in target table; skip userId=" + userId);
+            System.out.println(">>> private chat user is not in target table; skip userId=" + userId
+                    + ", projectType=" + projectType);
             return;
         }
 
         String updateUrl = "https://open.feishu.cn/open-apis/bitable/v1/apps/"
                 + chatGroupConfig.getBitableAppToken() + "/tables/" + tableId + "/records/" + recordId;
         String resp = apiClient.patchRequestWithResponse(updateUrl, body.toJSONString(), token);
-        System.out.println(">>> Updated Claude Code private chat tracking record: " + resp);
+        System.out.println(">>> Updated private chat tracking record: " + resp);
+    }
+
+    private boolean hasUserInTable(String tableId, String userId, String token) {
+        String recordId = findRecordIdByOpenId(tableId, userId, token);
+        if (recordId != null) {
+            return true;
+        }
+        return findRecordIdByAnyField(tableId, userId, token) != null;
     }
 
     private String findRecordIdByOpenId(String tableId, String userId, String token) {

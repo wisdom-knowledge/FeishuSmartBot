@@ -196,4 +196,113 @@ class FeishuBitableServiceTest {
                 eq("tenant-token")
         );
     }
+
+    @Test
+    void resolveProjectTypeByOpenIdReturnsMatchedProject() {
+        FeishuApiClient apiClient = mock(FeishuApiClient.class);
+        ChatGroupConfig chatGroupConfig = new ChatGroupConfig();
+        ReflectionTestUtils.setField(chatGroupConfig, "bitableAppToken", "app_token");
+        ReflectionTestUtils.setField(chatGroupConfig, "bitableTableIdClaudeCodeFormal", "tbl_claude");
+        ReflectionTestUtils.setField(chatGroupConfig, "bitableTableIdCodingAgentFormal", "tbl_coding_formal");
+        ReflectionTestUtils.setField(chatGroupConfig, "bitableTableIdCodingAgentTrial", "tbl_coding_trial");
+        ReflectionTestUtils.setField(chatGroupConfig, "bitableTableIdHippo3Formal", "tbl_hippo_formal");
+        ReflectionTestUtils.setField(chatGroupConfig, "bitableTableIdHippo3Exam", "tbl_hippo_exam");
+        ReflectionTestUtils.setField(chatGroupConfig, "bitableTableIdMcpTrial", "tbl_mcp");
+        ReflectionTestUtils.setField(chatGroupConfig, "bitableTableIdNewbie", "tbl_newbie");
+        ReflectionTestUtils.setField(chatGroupConfig, "bitableTableIdTrial", "tbl_trial");
+
+        when(apiClient.getRequest(contains("/tables/tbl_claude/records?page_size=500"), eq("tenant-token")))
+                .thenReturn(ResponseEntity.ok(buildRecordsResponse(new JSONArray())));
+        when(apiClient.getRequest(contains("/tables/tbl_coding_formal/records?page_size=500"), eq("tenant-token")))
+                .thenReturn(ResponseEntity.ok(buildRecordsResponse(recordsOf("rec_coding", "ou_test_user"))));
+
+        FeishuBitableService service = new FeishuBitableService(apiClient, chatGroupConfig);
+
+        String projectType = service.resolveProjectTypeByOpenId("ou_test_user", "tenant-token");
+
+        assertEquals("coding_agent_formal", projectType);
+    }
+
+    @Test
+    void resolveProjectTypeByOpenIdReturnsNullWhenNoTableMatches() {
+        FeishuApiClient apiClient = mock(FeishuApiClient.class);
+        ChatGroupConfig chatGroupConfig = new ChatGroupConfig();
+        ReflectionTestUtils.setField(chatGroupConfig, "bitableAppToken", "app_token");
+        ReflectionTestUtils.setField(chatGroupConfig, "bitableTableIdClaudeCodeFormal", "tbl_claude");
+        ReflectionTestUtils.setField(chatGroupConfig, "bitableTableIdCodingAgentFormal", "tbl_coding_formal");
+        ReflectionTestUtils.setField(chatGroupConfig, "bitableTableIdCodingAgentTrial", "tbl_coding_trial");
+        ReflectionTestUtils.setField(chatGroupConfig, "bitableTableIdHippo3Formal", "tbl_hippo_formal");
+        ReflectionTestUtils.setField(chatGroupConfig, "bitableTableIdHippo3Exam", "tbl_hippo_exam");
+        ReflectionTestUtils.setField(chatGroupConfig, "bitableTableIdMcpTrial", "tbl_mcp");
+        ReflectionTestUtils.setField(chatGroupConfig, "bitableTableIdNewbie", "tbl_newbie");
+        ReflectionTestUtils.setField(chatGroupConfig, "bitableTableIdTrial", "tbl_trial");
+
+        when(apiClient.getRequest(contains("/records?page_size=500"), eq("tenant-token")))
+                .thenReturn(ResponseEntity.ok(buildRecordsResponse(new JSONArray())));
+
+        FeishuBitableService service = new FeishuBitableService(apiClient, chatGroupConfig);
+
+        String projectType = service.resolveProjectTypeByOpenId("ou_no_match", "tenant-token");
+
+        assertEquals(null, projectType);
+    }
+
+    @Test
+    void resolveProjectTypesByOpenIdReturnsAllMatchedProjects() {
+        FeishuApiClient apiClient = mock(FeishuApiClient.class);
+        ChatGroupConfig chatGroupConfig = new ChatGroupConfig();
+        ReflectionTestUtils.setField(chatGroupConfig, "bitableAppToken", "app_token");
+        ReflectionTestUtils.setField(chatGroupConfig, "bitableTableIdClaudeCodeFormal", "tbl_claude");
+        ReflectionTestUtils.setField(chatGroupConfig, "bitableTableIdCodingAgentFormal", "tbl_coding_formal");
+        ReflectionTestUtils.setField(chatGroupConfig, "bitableTableIdCodingAgentTrial", "tbl_coding_trial");
+        ReflectionTestUtils.setField(chatGroupConfig, "bitableTableIdHippo3Formal", "tbl_hippo_formal");
+        ReflectionTestUtils.setField(chatGroupConfig, "bitableTableIdHippo3Exam", "tbl_hippo_exam");
+        ReflectionTestUtils.setField(chatGroupConfig, "bitableTableIdMcpTrial", "tbl_mcp");
+        ReflectionTestUtils.setField(chatGroupConfig, "bitableTableIdNewbie", "tbl_newbie");
+        ReflectionTestUtils.setField(chatGroupConfig, "bitableTableIdTrial", "tbl_trial");
+
+        when(apiClient.getRequest(contains("/tables/tbl_claude/records?page_size=500"), eq("tenant-token")))
+                .thenReturn(ResponseEntity.ok(buildRecordsResponse(recordsOf("rec_claude", "ou_test_user"))));
+        when(apiClient.getRequest(contains("/tables/tbl_coding_formal/records?page_size=500"), eq("tenant-token")))
+                .thenReturn(ResponseEntity.ok(buildRecordsResponse(new JSONArray())));
+        when(apiClient.getRequest(contains("/tables/tbl_coding_trial/records?page_size=500"), eq("tenant-token")))
+                .thenReturn(ResponseEntity.ok(buildRecordsResponse(new JSONArray())));
+        when(apiClient.getRequest(contains("/tables/tbl_hippo_formal/records?page_size=500"), eq("tenant-token")))
+                .thenReturn(ResponseEntity.ok(buildRecordsResponse(new JSONArray())));
+        when(apiClient.getRequest(contains("/tables/tbl_hippo_exam/records?page_size=500"), eq("tenant-token")))
+                .thenReturn(ResponseEntity.ok(buildRecordsResponse(new JSONArray())));
+        when(apiClient.getRequest(contains("/tables/tbl_mcp/records?page_size=500"), eq("tenant-token")))
+                .thenReturn(ResponseEntity.ok(buildRecordsResponse(new JSONArray())));
+        when(apiClient.getRequest(contains("/tables/tbl_newbie/records?page_size=500"), eq("tenant-token")))
+                .thenReturn(ResponseEntity.ok(buildRecordsResponse(recordsOf("rec_newbie", "ou_test_user"))));
+        when(apiClient.getRequest(contains("/tables/tbl_trial/records?page_size=500"), eq("tenant-token")))
+                .thenReturn(ResponseEntity.ok(buildRecordsResponse(new JSONArray())));
+
+        FeishuBitableService service = new FeishuBitableService(apiClient, chatGroupConfig);
+
+        List<String> projectTypes = service.resolveProjectTypesByOpenId("ou_test_user", "tenant-token");
+
+        assertEquals(List.of("claudecode_formal", "newbie"), projectTypes);
+    }
+
+    private JSONObject buildRecordsResponse(JSONArray items) {
+        JSONObject data = new JSONObject();
+        data.put("items", items);
+        data.put("has_more", false);
+        data.put("page_token", "");
+        JSONObject body = new JSONObject();
+        body.put("data", data);
+        return body;
+    }
+
+    private JSONArray recordsOf(String recordId, String openId) {
+        JSONObject fields = new JSONObject();
+        fields.put("OpenID", openId);
+        JSONObject record = new JSONObject();
+        record.put("record_id", recordId);
+        record.put("fields", fields);
+        JSONArray items = new JSONArray();
+        items.add(record);
+        return items;
+    }
 }

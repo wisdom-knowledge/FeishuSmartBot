@@ -4,6 +4,10 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 @Service
 public class FeishuMessageService {
 
@@ -240,27 +244,23 @@ public class FeishuMessageService {
 
         JSONArray elements = new JSONArray();
 
-        JSONObject markdownText = new JSONObject();
-        markdownText.put("tag", "lark_md");
-        markdownText.put("content",
+        JSONObject topMarkdownText = new JSONObject();
+        topMarkdownText.put("tag", "lark_md");
+        topMarkdownText.put("content",
                 "<at id=" + userId + "></at> 恭喜您进入正式任务阶段，请务必阅读以下内容：\n\n" +
-                "**加入我们的意义**\n" +
-                "- **参与奖励：** 审核通过后，可获得 100 元现金奖励\n" +
-                "- **专家认证：** 通过认证即成为一面千识平台认证 Claude Code 专家，优秀专家有机会登上官网展示\n" +
-                "- **优先通道：** 认证后优先获得平台后续高价值项目邀约（单任务 200-2000 元）\n\n" +
-                "**提交时限**\n" +
-                "为了尽快确认您的能力并纳入系统，请在进群后一周内完成任务提交，逾期将会被移除项目群。\n\n" +
-                "**如何提交**\n" +
-                "1. 打开 [一面千识人才平台](https://talent.meetchances.com/home)\n" +
-                "2. 登录 -> 主页 -> 我的项目\n" +
-                "3. 找到「Claude Code 认证专家」项目 -> 点击进入项目\n" +
-                "4. 按页面提示填写并提交\n\n" +
-                "**项目流程**\n" +
-                "进入项目群 -> 提交任务 -> 任务审核 -> 提交返修 -> 审核通过 -> 解锁奖励及认证 -> 等待后续高价值项目匹配");
-        JSONObject markdown = new JSONObject();
-        markdown.put("tag", "div");
-        markdown.put("text", markdownText);
-        elements.add(markdown);
+                "**加入我们的意义：**\n" +
+                "参与奖励：审核通过后，可获得 100 元现金奖励\n" +
+                "专家认证：通过认证即成为一面千识平台认证 Claude Code 专家，优秀专家有机会登上官网展示\n" +
+                "优先通道：认证后优先获得平台后续高价值项目邀约（单任务 200-2000 元）\n\n" +
+                "为了尽快确认您的能力并纳入系统，请在进群后一周内完成**消息提醒授权并提交任务**，逾期将会被移除项目群。\n\n" +
+                "请点击下方链接完成授权，解锁第一时间消息获取权限：\n" +
+                "✅ 任务状态提醒\n" +
+                "✅ 结算到账通知\n" +
+                "✅ 后续项目匹配提醒");
+        JSONObject topMarkdown = new JSONObject();
+        topMarkdown.put("tag", "div");
+        topMarkdown.put("text", topMarkdownText);
+        elements.add(topMarkdown);
 
         JSONObject ctaAction = new JSONObject();
         ctaAction.put("tag", "action");
@@ -270,19 +270,23 @@ public class FeishuMessageService {
         ctaAction.put("actions", ctaButtons);
         elements.add(ctaAction);
 
-        JSONObject hr = new JSONObject();
-        hr.put("tag", "hr");
-        elements.add(hr);
-
-        JSONObject guideAction = new JSONObject();
-        guideAction.put("tag", "action");
-        JSONArray guideButtons = new JSONArray();
-        guideButtons.add(buildUrlButton("任务提交指南", "default",
-                "https://meetchances.feishu.cn/docx/NRtEdEmsqoIRuJxCpqZcwKYKnfd?from=from_copylink"));
-        guideButtons.add(buildUrlButton("Trace 要求", "default",
-                "https://meetchances.feishu.cn/wiki/IqYPwVYz6iBsJSkAdphcQLRanHf?from=from_copylink"));
-        guideAction.put("actions", guideButtons);
-        elements.add(guideAction);
+        JSONObject bottomMarkdownText = new JSONObject();
+        bottomMarkdownText.put("tag", "lark_md");
+        bottomMarkdownText.put("content",
+                "\n" +
+                "**如何提交任务：**\n" +
+                "打开 [https://talent.meetchances.com/home](https://talent.meetchances.com/home)\n" +
+                "登录 -> 主页 -> 我的项目\n" +
+                "找到「Claude Code 认证专家」项目 -> 点击进入项目\n" +
+                "按页面提示填写并提交\n\n" +
+                "任务提交指南：https://meetchances.feishu.cn/docx/NRtEdEmsqoIRuJxCpqZcwKYKnfd?from=from_copylink\n" +
+                "Trace要求：https://meetchances.feishu.cn/wiki/IqYPwVYz6iBsJSkAdphcQLRanHf?from=from_copylink\n\n" +
+                "**项目流程：**\n" +
+                "进入项目群 -> 完成授权 -> 提交任务 -> 任务审核 -> 提交返修 -> 审核通过 -> 解锁奖励及认证 -> 等待后续高价值项目匹配");
+        JSONObject bottomMarkdown = new JSONObject();
+        bottomMarkdown.put("tag", "div");
+        bottomMarkdown.put("text", bottomMarkdownText);
+        elements.add(bottomMarkdown);
 
         card.put("elements", elements);
 
@@ -309,13 +313,135 @@ public class FeishuMessageService {
     }
 
     public void sendPrivateGuide(String userId, String userName, String token) {
-        String text = "你好 " + userName + "，欢迎加入新人群！\n\n" +
-                "🎉 新人须知：\n" +
-                "1. 请收看群公告\n" +
-                "2. 查阅群公告中的《Hippo项目新人指南》\n" +
-                "3. 根据指南参加考试，通过进入试标\n" +
-                "4. 有问题可@管理员";
-        sendPrivateTextMessage(userId, text, token);
+        sendPrivateGuideByProject(userId, userName, token, null);
+    }
+
+    public void sendPrivateGuideByProject(String userId, String userName, String token, String projectType) {
+        Set<String> projectTypes = new LinkedHashSet<>();
+        if (projectType != null && !projectType.trim().isEmpty()) {
+            projectTypes.add(projectType);
+        }
+        sendPrivateGuideByProjects(userId, userName, token, projectTypes);
+    }
+
+    public void sendPrivateGuideByProjects(String userId, String userName, String token, Collection<String> projectTypes) {
+        JSONObject card = buildPrivateGuideCard(userName, projectTypes);
+        sendPrivateInteractiveCardMessage(userId, card, token);
+    }
+
+    private JSONObject buildPrivateGuideCard(String userName, Collection<String> projectTypes) {
+        JSONObject card = new JSONObject();
+        JSONObject config = new JSONObject();
+        config.put("wide_screen_mode", true);
+        card.put("config", config);
+
+        JSONObject title = new JSONObject();
+        title.put("tag", "plain_text");
+        title.put("content", "项目任务引导");
+        JSONObject header = new JSONObject();
+        header.put("template", "blue");
+        header.put("title", title);
+        card.put("header", header);
+
+        JSONArray elements = new JSONArray();
+        Set<String> uniqueProjects = projectTypes == null
+                ? new LinkedHashSet<>()
+                : new LinkedHashSet<>(projectTypes);
+        String greeting = uniqueProjects.isEmpty()
+                ? "你好 " + userName + "，暂未识别到明确项目，先看通用引导："
+                : "你好 " + userName + "，你当前匹配到以下项目引导：";
+        elements.add(buildMarkdownDiv(greeting));
+
+        boolean first = true;
+        for (String projectType : uniqueProjects) {
+            if (!first) {
+                JSONObject hr = new JSONObject();
+                hr.put("tag", "hr");
+                elements.add(hr);
+            }
+            first = false;
+            String content = "**【" + resolveProjectTitle(projectType) + "】**\n" + buildSingleProjectGuide(projectType);
+            elements.add(buildMarkdownDiv(content));
+        }
+        if (uniqueProjects.isEmpty()) {
+            elements.add(buildMarkdownDiv(buildSingleProjectGuide(null)));
+        }
+
+        card.put("elements", elements);
+        return card;
+    }
+
+    private JSONObject buildMarkdownDiv(String content) {
+        JSONObject markdownText = new JSONObject();
+        markdownText.put("tag", "lark_md");
+        markdownText.put("content", content);
+        JSONObject div = new JSONObject();
+        div.put("tag", "div");
+        div.put("text", markdownText);
+        return div;
+    }
+
+    private void sendPrivateInteractiveCardMessage(String userId, JSONObject card, String token) {
+        String url = "https://open.feishu.cn/open-apis/im/v1/messages?receive_id_type=open_id";
+        JSONObject body = new JSONObject();
+        body.put("receive_id", userId);
+        body.put("msg_type", "interactive");
+        body.put("content", card.toJSONString());
+        apiClient.postRequest(url, body.toJSONString(), token);
+    }
+
+    private String buildSingleProjectGuide(String projectType) {
+        if ("claudecode_formal".equals(projectType)) {
+            return "恭喜您进入正式任务阶段，请务必阅读以下内容：\n\n" +
+                    "如何提交任务：\n" +
+                    "打开 https://talent.meetchances.com/home\n" +
+                    "登录 -> 主页 -> 我的项目\n" +
+                    "找到「Claude Code 认证专家」项目 -> 点击进入项目\n" +
+                    "按页面提示填写并提交\n\n" +
+                    "任务提交指南：https://meetchances.feishu.cn/docx/NRtEdEmsqoIRuJxCpqZcwKYKnfd?from=from_copylink\n" +
+                    "Trace要求：https://meetchances.feishu.cn/wiki/IqYPwVYz6iBsJSkAdphcQLRanHf?from=from_copylink\n\n" +
+                    "项目流程：进入项目群 -> 完成授权 -> 提交任务 -> 任务审核 -> 提交返修 -> 审核通过 -> 解锁奖励及认证";
+        }
+        if ("coding_agent_formal".equals(projectType) || "coding_agent_trial".equals(projectType)) {
+            return "欢迎加入 solo coder 项目！\n\n" +
+                    "做题前准备：\n" +
+                    "1. 先阅读领题/做题流程：https://meetchances.feishu.cn/docx/SAQXdMjztoYIxIxoaYXcEYshnGc?from=from_copylink\n" +
+                    "2. 做题前请仔细阅读培训文档：https://meetchances.feishu.cn/wiki/MosDw95SFiP4y0kMU0YclqelnHc?from=from_copylink\n\n" +
+                    "有任何问题，随时 @群管理员 为你解答。";
+        }
+        if ("hippo3_formal".equals(projectType) || "hippo3_exam".equals(projectType)) {
+            return "欢迎加入 Hippo3.0 项目。\n\n" +
+                    "请先查看群公告，再按项目文档完成对应流程。\n" +
+                    "项目指南：https://meetchances.feishu.cn/docx/LhcFdwYIOow5sexdOvNctv84nEd?from=from_copylink\n\n" +
+                    "如遇问题请联系群管理员。";
+        }
+        if ("mcp_trial".equals(projectType)) {
+            return "欢迎加入 MCP 试标项目。\n\n" +
+                    "请先查看群公告，再阅读培训文档：\n" +
+                    "https://meetchances.feishu.cn/wiki/XgJHwAGqkiAk6MkH0eXcpMX0nXg?from=from_copylink\n\n" +
+                    "有任何问题，随时 @群管理员。";
+        }
+        if ("newbie".equals(projectType) || "trial".equals(projectType)) {
+            return "欢迎加入项目群！\n\n" +
+                    "请先查看群公告并阅读项目指南，按流程完成提交。\n" +
+                    "有问题可@群管理员咨询。";
+        }
+        return "欢迎加入项目！\n\n" +
+                "请先查看群公告并按项目流程完成任务提交。\n" +
+                "如未收到对应指引，可在群内@管理员协助处理。";
+    }
+
+    private String resolveProjectTitle(String projectType) {
+        if ("claudecode_formal".equals(projectType)) return "Claude Code 正式项目";
+        if ("coding_agent_formal".equals(projectType)) return "Coding Agent 正式项目";
+        if ("coding_agent_trial".equals(projectType)) return "Coding Agent 试标项目";
+        if ("hippo3_formal".equals(projectType)) return "Hippo3.0 正式项目";
+        if ("hippo3_exam".equals(projectType)) return "Hippo3.0 考试项目";
+        if ("mcp_trial".equals(projectType)) return "MCP 试标项目";
+        if ("newbie".equals(projectType)) return "Hippo 新人项目";
+        if ("trial".equals(projectType)) return "Hippo 试标项目";
+        if (projectType == null || projectType.trim().isEmpty()) return "通用项目";
+        return projectType;
     }
 }
 
