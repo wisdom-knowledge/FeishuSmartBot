@@ -62,6 +62,18 @@ public class WelcomeService {
                 case "hippo3_exam" -> messageService.sendHippo3ExamGroupWelcome(chatId, userId, token);
                 case "hippo3_formal" -> messageService.sendHippo3FormalGroupWelcome(chatId, userId, token);
                 case "claudecode_formal" -> messageService.sendClaudeCodeFormalGroupWelcome(chatId, userId, token);
+                case "compass_formal" -> messageService.sendCompassFormalGroupWelcome(chatId, userId, token);
+            }
+
+            if (tableId != null && !tableId.trim().isEmpty()) {
+                int tableJoinCount = bitableService.getSubmittedIds(tableId, "OpenID", token).size();
+                System.out.println(">>> [入群统计] chatId=" + chatId
+                        + ", chatType=" + chatType
+                        + ", tableId=" + tableId
+                        + ", 基于多维表格(OpenID)的入群人数=" + tableJoinCount);
+            } else {
+                System.out.println(">>> [入群统计] 未配置 tableId，跳过表格人数统计: chatId=" + chatId
+                        + ", chatType=" + chatType);
             }
         } catch (Exception e) {
             System.err.println("处理入群事件失败: " + e.getMessage());

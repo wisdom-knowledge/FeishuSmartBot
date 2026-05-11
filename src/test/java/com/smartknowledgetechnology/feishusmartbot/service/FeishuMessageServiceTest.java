@@ -16,7 +16,7 @@ import static org.mockito.Mockito.verify;
 class FeishuMessageServiceTest {
 
     @Test
-    void sendClaudeCodeFormalGroupWelcomeSendsEphemeralCardWithPrimaryBotButton() {
+    void sendClaudeCodeFormalGroupWelcomeSendsEphemeralCardWithoutAssistantButton() {
         FeishuApiClient apiClient = mock(FeishuApiClient.class);
         FeishuMessageService service = new FeishuMessageService(apiClient);
 
@@ -42,29 +42,49 @@ class FeishuMessageServiceTest {
         JSONObject markdown = elements.getJSONObject(0);
         assertEquals("div", markdown.getString("tag"));
         assertEquals("lark_md", markdown.getJSONObject("text").getString("tag"));
-        assertTrue(markdown.getJSONObject("text").getString("content").contains("<at id=ou_test_user></at>"));
-        assertTrue(markdown.getJSONObject("text").getString("content").contains("恭喜您进入正式任务阶段"));
+        String topContent = markdown.getJSONObject("text").getString("content");
+        assertTrue(topContent.contains("<at id=ou_test_user></at>"));
+        assertTrue(topContent.contains("欢迎加入「XX 专家认证项目」"));
+        assertTrue(topContent.contains("请在进群后一周内完成任务提交"));
+        assertTrue(topContent.contains("提交入口"));
+        assertTrue(topContent.contains("一面千识人才平台"));
+        assertTrue(topContent.contains("任务SOP文档"));
+        assertTrue(topContent.contains("项目流程"));
+        assertTrue(!topContent.contains("打开任务助手"));
+        assertEquals(1, elements.size());
+    }
 
-        JSONObject button = null;
-        for (int i = 0; i < elements.size(); i++) {
-            JSONObject element = elements.getJSONObject(i);
-            if (!"action".equals(element.getString("tag"))) continue;
-            JSONArray actions = element.getJSONArray("actions");
-            if (actions == null || actions.isEmpty()) continue;
-            JSONObject candidate = actions.getJSONObject(0);
-            if ("打开任务助手".equals(candidate.getJSONObject("text").getString("content"))) {
-                button = candidate;
-                break;
-            }
-        }
-        assertTrue(button != null, "should contain 打开任务助手 button");
-        assertEquals("button", button.getString("tag"));
-        assertEquals("primary", button.getString("type"));
-        assertEquals("打开任务助手", button.getJSONObject("text").getString("content"));
-        assertEquals(
-                "https://applink.feishu.cn/client/bot/open?appId=cli_a909be3353badbc6",
-                button.getString("url")
+    @Test
+    void sendCompassFormalGroupWelcomeSendsEphemeralCardWithNoticeContent() {
+        FeishuApiClient apiClient = mock(FeishuApiClient.class);
+        FeishuMessageService service = new FeishuMessageService(apiClient);
+
+        service.sendCompassFormalGroupWelcome("oc_test_chat", "ou_test_user", "tenant-token");
+
+        ArgumentCaptor<String> bodyCaptor = ArgumentCaptor.forClass(String.class);
+        verify(apiClient).postRequestAndCheckSuccess(
+                eq("https://open.feishu.cn/open-apis/ephemeral/v1/send"),
+                bodyCaptor.capture(),
+                eq("tenant-token"),
+                eq("Compass 正式群欢迎临时卡片")
         );
+
+        JSONObject body = JSONObject.parseObject(bodyCaptor.getValue());
+        assertEquals("oc_test_chat", body.getString("chat_id"));
+        assertEquals("ou_test_user", body.getString("open_id"));
+        assertEquals("interactive", body.getString("msg_type"));
+
+        JSONObject card = body.getJSONObject("card");
+        assertEquals("orange", card.getJSONObject("header").getString("template"));
+        assertEquals("Compass 正式专家群入群通知", card.getJSONObject("header")
+                .getJSONObject("title").getString("content"));
+
+        JSONArray elements = card.getJSONArray("elements");
+        JSONObject markdown = elements.getJSONObject(0);
+        String content = markdown.getJSONObject("text").getString("content");
+        assertTrue(content.contains("<at id=ou_test_user></at>"));
+        assertTrue(content.contains("恭喜您进入Compass正式作业阶段"));
+        assertTrue(content.contains("请勿申请Compass表格权限"));
     }
 
     @Test

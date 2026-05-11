@@ -55,9 +55,16 @@ public class FeishuEventController {
             String chatId = event.getString("chat_id");
             JSONArray users = event.getJSONArray("users");
             if (users != null && !users.isEmpty()) {
-                String userId = users.getJSONObject(0).getJSONObject("user_id").getString("open_id");
-                System.out.println(">>> 监测到新入群事件: Chat=" + chatId + ", User=" + userId);
-                executorService.submit(() -> welcomeService.handleJoinEvent(chatId, userId));
+                for (int i = 0; i < users.size(); i++) {
+                    JSONObject userObj = users.getJSONObject(i);
+                    if (userObj == null) continue;
+                    JSONObject userIdObj = userObj.getJSONObject("user_id");
+                    if (userIdObj == null) continue;
+                    String userId = userIdObj.getString("open_id");
+                    if (userId == null || userId.isEmpty()) continue;
+                    System.out.println(">>> 监测到新入群事件: Chat=" + chatId + ", User=" + userId);
+                    executorService.submit(() -> welcomeService.handleJoinEvent(chatId, userId));
+                }
             }
         } else if ("im.message.receive_v1".equals(eventType)) {
             JSONObject message = event.getJSONObject("message");

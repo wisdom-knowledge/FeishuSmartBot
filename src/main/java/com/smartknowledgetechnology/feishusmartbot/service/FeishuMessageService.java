@@ -224,6 +224,49 @@ public class FeishuMessageService {
         sendGroupTextMessage(chatId, text, token);
     }
 
+    public void sendCompassFormalGroupWelcome(String chatId, String userId, String token) {
+        String url = "https://open.feishu.cn/open-apis/ephemeral/v1/send";
+
+        JSONObject card = new JSONObject();
+        JSONObject config = new JSONObject();
+        config.put("wide_screen_mode", true);
+        card.put("config", config);
+
+        JSONObject title = new JSONObject();
+        title.put("tag", "plain_text");
+        title.put("content", "Compass 正式专家群入群通知");
+        JSONObject header = new JSONObject();
+        header.put("template", "orange");
+        header.put("title", title);
+        card.put("header", header);
+
+        JSONArray elements = new JSONArray();
+        JSONObject markdownText = new JSONObject();
+        markdownText.put("tag", "lark_md");
+        markdownText.put("content",
+                "<at id=" + userId + "></at> 恭喜您进入Compass正式作业阶段，请务必阅读群公告。\n\n" +
+                        "**群公告查看地址：**\n" +
+                        "PC端：点击群名称下方群公告图标进入群公告\n" +
+                        "手机端：方法一：点击群名称下的【群公告】进入群公告；方法二：点击右上方三个点（群名称旁边的三个点），在群应用中找到群公告\n\n" +
+                        "**群公告包含：**\n" +
+                        "项目信息、工作台进入方法、相关文档\n\n" +
+                        "请勿申请Compass表格权限，您可以在工作台中找到任务入口及所需的所有材料。\n" +
+                        "飞书绑定信息同步可能会有延迟，建议您绑定飞书1小时后再提交任务。");
+        JSONObject markdown = new JSONObject();
+        markdown.put("tag", "div");
+        markdown.put("text", markdownText);
+        elements.add(markdown);
+        card.put("elements", elements);
+
+        JSONObject requestBody = new JSONObject();
+        requestBody.put("chat_id", chatId);
+        requestBody.put("open_id", userId);
+        requestBody.put("msg_type", "interactive");
+        requestBody.put("card", card);
+
+        apiClient.postRequestAndCheckSuccess(url, requestBody.toJSONString(), token, "Compass 正式群欢迎临时卡片");
+    }
+
     public void sendClaudeCodeFormalGroupWelcome(String chatId, String userId, String token) {
         String url = "https://open.feishu.cn/open-apis/ephemeral/v1/send";
 
@@ -247,46 +290,21 @@ public class FeishuMessageService {
         JSONObject topMarkdownText = new JSONObject();
         topMarkdownText.put("tag", "lark_md");
         topMarkdownText.put("content",
-                "<at id=" + userId + "></at> 恭喜您进入正式任务阶段，请务必阅读以下内容：\n\n" +
-                "**加入我们的意义：**\n" +
-                "参与奖励：审核通过后，可获得 100 元现金奖励\n" +
-                "专家认证：通过认证即成为一面千识平台认证 Claude Code 专家，优秀专家有机会登上官网展示\n" +
-                "优先通道：认证后优先获得平台后续高价值项目邀约（单任务 200-2000 元）\n\n" +
-                "为了尽快确认您的能力并纳入系统，请在进群后一周内完成**消息提醒授权并提交任务**，逾期将会被移除项目群。\n\n" +
-                "请点击下方链接完成授权，解锁第一时间消息获取权限：\n" +
-                "✅ 任务状态提醒\n" +
-                "✅ 结算到账通知\n" +
-                "✅ 后续项目匹配提醒");
+                "<at id=" + userId + "></at>\n\n" +
+                "欢迎加入「ClaudeCode专家认证项目」。本项目用于评估并认证专家在ClaudeCode领域的标注/审核能力，认证通过后可优先参与后续正式项目。\n\n" +
+                "为了尽快确认您的能力并纳入系统，请在进群后一周内完成任务提交，逾期将会被移除项目群。\n\n" +
+                "**提交入口**\n" +
+                "1. 打开 [一面千识人才平台](https://talent.meetchances.com/home)\n" +
+                "2. 登录 -> 主页 -> 我的项目\n" +
+                "3. 找到「Claude Code 认证专家」项目 -> 点击进入项目\n" +
+                "4. 按页面提示填写并提交\n\n" +
+                "**任务SOP文档：** [Claude Code 认证专家操作指南](https://meetchances.feishu.cn/docx/NRtEdEmsqoIRuJxCpqZcwKYKnfd?from=from_copylink) [专家项目 Trace 要求](https://meetchances.feishu.cn/wiki/IqYPwVYz6iBsJSkAdphcQLRanHf?from=from_copylink)\n\n" +
+                "**项目流程**\n" +
+                "进入项目群 -> 提交任务 -> 任务审核 -> 提交返修 -> 审核通过 -> 解锁奖励及认证 -> 等待后续高价值项目匹配");
         JSONObject topMarkdown = new JSONObject();
         topMarkdown.put("tag", "div");
         topMarkdown.put("text", topMarkdownText);
         elements.add(topMarkdown);
-
-        JSONObject ctaAction = new JSONObject();
-        ctaAction.put("tag", "action");
-        JSONArray ctaButtons = new JSONArray();
-        ctaButtons.add(buildUrlButton("打开任务助手", "primary",
-                "https://applink.feishu.cn/client/bot/open?appId=cli_a909be3353badbc6"));
-        ctaAction.put("actions", ctaButtons);
-        elements.add(ctaAction);
-
-        JSONObject bottomMarkdownText = new JSONObject();
-        bottomMarkdownText.put("tag", "lark_md");
-        bottomMarkdownText.put("content",
-                "\n" +
-                "**如何提交任务：**\n" +
-                "打开 [https://talent.meetchances.com/home](https://talent.meetchances.com/home)\n" +
-                "登录 -> 主页 -> 我的项目\n" +
-                "找到「Claude Code 认证专家」项目 -> 点击进入项目\n" +
-                "按页面提示填写并提交\n\n" +
-                "任务提交指南：https://meetchances.feishu.cn/docx/NRtEdEmsqoIRuJxCpqZcwKYKnfd?from=from_copylink\n" +
-                "Trace要求：https://meetchances.feishu.cn/wiki/IqYPwVYz6iBsJSkAdphcQLRanHf?from=from_copylink\n\n" +
-                "**项目流程：**\n" +
-                "进入项目群 -> 完成授权 -> 提交任务 -> 任务审核 -> 提交返修 -> 审核通过 -> 解锁奖励及认证 -> 等待后续高价值项目匹配");
-        JSONObject bottomMarkdown = new JSONObject();
-        bottomMarkdown.put("tag", "div");
-        bottomMarkdown.put("text", bottomMarkdownText);
-        elements.add(bottomMarkdown);
 
         card.put("elements", elements);
 
@@ -297,19 +315,6 @@ public class FeishuMessageService {
         requestBody.put("card", card);
 
         apiClient.postRequestAndCheckSuccess(url, requestBody.toJSONString(), token, "Claude Code 正式群欢迎临时卡片");
-    }
-
-    private JSONObject buildUrlButton(String text, String type, String url) {
-        JSONObject buttonText = new JSONObject();
-        buttonText.put("tag", "plain_text");
-        buttonText.put("content", text);
-
-        JSONObject button = new JSONObject();
-        button.put("tag", "button");
-        button.put("type", type);
-        button.put("text", buttonText);
-        button.put("url", url);
-        return button;
     }
 
     public void sendPrivateGuide(String userId, String userName, String token) {

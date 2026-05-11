@@ -36,6 +36,9 @@ public class ChatGroupConfig {
     @Value("${feishu.bitable.table-id.claudecode.formal}")
     private String bitableTableIdClaudeCodeFormal;
 
+    @Value("${feishu.bitable.table-id.compass.formal:}")
+    private String bitableTableIdCompassFormal;
+
     @Value("${feishu.chat.target-id.trial}")
     private String targetChatIdTrial;
 
@@ -59,6 +62,9 @@ public class ChatGroupConfig {
 
     @Value("${feishu.chat.target-id.claudecode.formal}")
     private String targetChatIdClaudeCodeFormal;
+
+    @Value("${feishu.chat.target-id.compass.formal}")
+    private String targetChatIdCompassFormal;
 
     @Value("${feishu.chat.target-id.test:}")
     private String targetChatIdTest;
@@ -86,6 +92,7 @@ public class ChatGroupConfig {
         if (targetChatIdHippo3Exam.equals(chatId)) return bitableTableIdHippo3Exam;
         if (targetChatIdHippo3Formal.equals(chatId)) return bitableTableIdHippo3Formal;
         if (targetChatIdClaudeCodeFormal.equals(chatId)) return bitableTableIdClaudeCodeFormal;
+        if (targetChatIdCompassFormal.equals(chatId)) return bitableTableIdCompassFormal;
         return null;
     }
 
@@ -101,6 +108,7 @@ public class ChatGroupConfig {
         if (targetChatIdHippo3Exam.equals(chatId)) return "hippo3_exam";
         if (targetChatIdHippo3Formal.equals(chatId)) return "hippo3_formal";
         if (targetChatIdClaudeCodeFormal.equals(chatId)) return "claudecode_formal";
+        if (targetChatIdCompassFormal.equals(chatId)) return "compass_formal";
         if (targetChatIdTest != null && targetChatIdTest.equals(chatId)) return "test";
         return null;
     }
@@ -130,6 +138,7 @@ public class ChatGroupConfig {
         map.put(targetChatIdHippo3Exam, "hippo3_exam");
         map.put(targetChatIdHippo3Formal, "hippo3_formal");
         map.put(targetChatIdClaudeCodeFormal, "claudecode_formal");
+        map.put(targetChatIdCompassFormal, "compass_formal");
         return map;
     }
 
@@ -144,6 +153,7 @@ public class ChatGroupConfig {
         map.put("hippo3_formal", bitableTableIdHippo3Formal);
         map.put("hippo3_exam", bitableTableIdHippo3Exam);
         map.put("mcp_trial", bitableTableIdMcpTrial);
+        map.put("compass_formal", bitableTableIdCompassFormal);
         map.put("newbie", bitableTableIdNewbie);
         map.put("trial", bitableTableIdTrial);
         return map;
